@@ -1,0 +1,24 @@
+{
+  "circle_name": "dev :",
+  "circle_tagline": "OFFICIAL COMMUNITY",
+  "default_certificate_title": "CERTIFICATE OF MEMBERSHIP",
+  "default_subtitle": "THIS IS PROUDLY PRESENTED TO",
+  "default_citation": "In recognition of exceptional dedication, trusted fellowship, and invaluable contributions to the dev : community.",
+  "issue_date": "2026-11-22",
+  "status": "OFFICIAL & VERIFIED",
+  "verify_url_base": "https://mrvlous.github.io/dev/verify.html",
+  "signatories": [
+    {
+      "name": "Moh. Ananda Firmansyah Putra",
+      "role": "Founder & Owner"
+    },
+    {
+      "name": "Adnan Choirul Ramadhani",
+      "role": "Co-Founder & Admin"
+    },
+    {
+      "name": "Rifky Kurniawan",
+      "role": "Co-Founder & Admin"
+    }
+  ]
+}

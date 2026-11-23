@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dev : Credential Validator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand-row">
+        <div class="brand-identity">
+          <img src="assets/logo_light.png" alt="dev logo" class="brand-logo logo-dark-mode">
+          <img src="assets/logo_dark.png" alt="dev logo" class="brand-logo logo-light-mode">
+          <div class="brand-text">
+            <h1 class="brand-title">dev :</h1>
+            <span class="brand-badge">PQC Authority</span>
+          </div>
+        </div>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="m4.93 4.93 1.41 1.41"></path>
+            <path d="m17.66 17.66 1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="m6.34 17.66-1.41 1.41"></path>
+            <path d="m19.07 4.93-1.41 1.41"></path>
+          </svg>
+          <span id="theme-label">Dark</span>
+        </button>
+      </div>
+      <p class="subtitle">NIST FIPS 204 ML-DSA-65 Cryptographic Credential Validator</p>
+    </header>
+
+    <section class="search-section">
+      <form class="search-form" id="search-form">
+        <input
+          type="text"
+          class="search-input"
+          id="search-input"
+          placeholder="Enter Credential ID, Legality ID, or Member Name"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button type="submit" class="search-button">Validate</button>
+      </form>
+
+      <div class="example-chips">
+        <span class="example-label">Examples:</span>
+        <button type="button" class="chip" data-id="RVD-DEV-0001-F648">RVD-DEV-0001-F648</button>
+        <button type="button" class="chip" data-id="RVD-DEV-0002-9D50">RVD-DEV-0002-9D50</button>
+        <button type="button" class="chip" data-id="RVD-DEV-0003-EDC5">RVD-DEV-0003-EDC5</button>
+      </div>
+    </section>
+
+    <main id="result-container">
+      <div class="empty-state">
+        Enter a credential identifier above to inspect cryptographic authenticity.
+      </div>
+    </main>
+
+    <footer class="footer">
+      Cryptographic Integrity Powered by Rivide (NIST FIPS 204 ML-DSA-65)
+    </footer>
+  </div>
+
+  <script src="js/registry_data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
