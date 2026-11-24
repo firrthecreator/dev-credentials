@@ -49,7 +49,7 @@ impl AuthorityKeypair {
             algorithm: "NIST FIPS 204 ML-DSA-65".to_string(),
             created_at: Utc::now().to_rfc3339(),
             issuer: "dev : community".to_string(),
-            authority: "Moh. Ananda Firmansyah putra".to_string(),
+            authority: "Moh. Ananda Firmansyah Putra".to_string(),
         })
     }
 

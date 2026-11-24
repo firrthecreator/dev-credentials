@@ -42,7 +42,7 @@ impl CertificateSigner {
             &seed_hash[8..12]
         );
 
-        let signatory_name = "Moh. Ananda Firmansyah putra";
+        let signatory_name = "Moh. Ananda Firmansyah Putra";
         let signatory_role = "Founder & Owner";
 
         let final_payload = CanonicalPayload::final_payload(
