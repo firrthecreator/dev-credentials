@@ -150,13 +150,13 @@
     "status": "AUTHENTIC & VERIFIED"
   },
   {
-    "id": "RVD-DEV-0016-3AD9",
-    "name": "Musthafa Saiful Arif",
+    "id": "RVD-DEV-0016-4531",
+    "name": "Musthafa Saeful Arif",
     "date": "2026-11-22",
-    "legality_id": "RVD-65:3AD9-CF76-2EED",
+    "legality_id": "RVD-65:4531-ECE3-5863",
     "member_no": 16,
     "algorithm": "NIST FIPS 204 ML-DSA-65",
-    "signature_sha3_256": "979F6DC3FA0A2E26E7A036AE8BDD1BE1163301C07F664881CE8A34CBAC1B6FBD",
+    "signature_sha3_256": "5CAE9E222CEDBBD8FD5B765EA3D3FB4FEEF97D65289DCE0DC32E1969E1012A54",
     "status": "AUTHENTIC & VERIFIED"
   },
   {

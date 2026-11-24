@@ -11,7 +11,7 @@ impl SignRunner {
     pub fn run<P: AsRef<Path>>(root: P) -> Result<(), Box<dyn std::error::Error>> {
         let authority: AuthorityKeypair = KeyStore::load_or_create(&root)?;
         let mut members = MemberStore::load(&root)?;
-        let mut registry = RegistryStore::load(&root)?;
+        let mut registry = std::collections::BTreeMap::new();
 
         println!("Signing certificates using Rivide ML-DSA-65 authority");
         println!("Authority: {}", authority.authority);
