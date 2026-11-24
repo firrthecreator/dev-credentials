@@ -59,29 +59,6 @@
     }
   }
 
-  function getAllRecordsSorted() {
-    const list = Object.values(registry);
-    list.sort((a, b) => (a.member_no || 0) - (b.member_no || 0));
-    return list;
-  }
-
-  function filterRecords(query) {
-    const clean = (query || "").trim().toLowerCase();
-    const all = getAllRecordsSorted();
-    if (!clean) return all;
-
-    return all.filter(r => {
-      return (
-        r.id.toLowerCase() === clean ||
-        r.id.toLowerCase().includes(clean) ||
-        r.legality_id.toLowerCase().includes(clean) ||
-        r.name.toLowerCase().includes(clean) ||
-        String(r.member_no) === clean ||
-        `#${r.member_no}` === clean
-      );
-    });
-  }
-
   function escapeHtml(str) {
     if (!str) return "";
     return String(str)
@@ -92,18 +69,48 @@
       .replace(/'/g, "&#039;");
   }
 
-  function renderDirectory(records, isFiltered) {
-    const container = document.getElementById("result-view");
-    if (!records.length) {
-      container.innerHTML = `
-        <div class="card state-empty">
-          No credential record matches your query.
-        </div>
-      `;
-      return;
-    }
+  function findMatches(query) {
+    const clean = (query || "").trim().toLowerCase();
+    if (!clean) return [];
 
-    const title = isFiltered ? "Search Results" : "Verified Registry Directory";
+    const matches = [];
+    for (const key of Object.keys(registry)) {
+      const item = registry[key];
+      if (
+        item.id.toLowerCase() === clean ||
+        item.id.toLowerCase().includes(clean) ||
+        item.legality_id.toLowerCase().includes(clean) ||
+        item.name.toLowerCase().includes(clean) ||
+        String(item.member_no) === clean ||
+        `#${item.member_no}` === clean
+      ) {
+        matches.push(item);
+      }
+    }
+    matches.sort((a, b) => (a.member_no || 0) - (b.member_no || 0));
+    return matches;
+  }
+
+  function renderEmptyPrompt() {
+    const container = document.getElementById("result-view");
+    container.innerHTML = `
+      <div class="card state-empty">
+        Enter a Credential ID, Legality ID, or member name above to inspect authenticity.
+      </div>
+    `;
+  }
+
+  function renderNotFound(query) {
+    const container = document.getElementById("result-view");
+    container.innerHTML = `
+      <div class="card state-empty">
+        No credential found matching "${escapeHtml(query)}".
+      </div>
+    `;
+  }
+
+  function renderSearchResults(records) {
+    const container = document.getElementById("result-view");
     const rows = records.map(r => `
       <div class="directory-row" data-id="${escapeHtml(r.id)}">
         <div class="row-left">
@@ -121,8 +128,8 @@
 
     container.innerHTML = `
       <div class="directory-header">
-        <span class="directory-title">${escapeHtml(title)}</span>
-        <span class="directory-count">${records.length} ${records.length === 1 ? "record" : "records"}</span>
+        <span class="directory-title">Matching Results</span>
+        <span class="directory-count">${records.length} ${records.length === 1 ? "match" : "matches"}</span>
       </div>
       <div class="directory-list">
         ${rows}
@@ -267,15 +274,17 @@
     }
 
     if (!clean) {
-      renderDirectory(getAllRecordsSorted(), false);
+      renderEmptyPrompt();
       return;
     }
 
-    const matches = filterRecords(clean);
+    const matches = findMatches(clean);
     if (matches.length === 1) {
       renderDetail(matches[0]);
+    } else if (matches.length > 1) {
+      renderSearchResults(matches);
     } else {
-      renderDirectory(matches, true);
+      renderNotFound(clean);
     }
   }
 
@@ -307,16 +316,6 @@
       });
     }
 
-    document.querySelectorAll(".filter-pill").forEach(pill => {
-      pill.addEventListener("click", function() {
-        const q = this.getAttribute("data-query");
-        if (input && q) {
-          input.value = q;
-          handleQuery(q);
-        }
-      });
-    });
-
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get("id") || params.get("verify") || params.get("q");
 
@@ -324,7 +323,7 @@
       if (input) input.value = initialQuery;
       handleQuery(initialQuery);
     } else {
-      renderDirectory(getAllRecordsSorted(), false);
+      renderEmptyPrompt();
     }
   }
 
