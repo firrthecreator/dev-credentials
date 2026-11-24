@@ -1,10 +1,10 @@
 (function() {
   let registry = {};
+  let toastTimer = null;
 
   function initTheme() {
-    const saved = localStorage.getItem("dev-theme");
-    const theme = saved || "dark";
-    setTheme(theme);
+    const saved = localStorage.getItem("dev-theme") || "dark";
+    setTheme(saved);
 
     const toggle = document.getElementById("theme-toggle");
     if (toggle) {
@@ -19,15 +19,31 @@
   function setTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("dev-theme", theme);
-    const label = document.getElementById("theme-label");
-    if (label) {
-      label.textContent = theme === "dark" ? "Dark" : "Light";
-    }
+  }
+
+  function showToast(text) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 1600);
+  }
+
+  function copyText(text, label) {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(label ? `Copied ${label}` : "Copied to clipboard");
+    }).catch(() => {
+      showToast("Unable to copy");
+    });
   }
 
   async function loadRegistry() {
     if (window.__DEFAULT_REGISTRY__) {
-      registry = window.__DEFAULT_REGISTRY__;
+      registry = Object.assign({}, window.__DEFAULT_REGISTRY__);
     }
     const paths = ["data/db_registry.json", "../data/db_registry.json"];
     for (const p of paths) {
@@ -43,129 +59,26 @@
     }
   }
 
-  function findRecord(query) {
-    if (!query) return null;
-    const clean = query.trim();
-    if (!clean) return null;
-
-    if (registry[clean]) {
-      return registry[clean];
-    }
-
-    const lower = clean.toLowerCase();
-    for (const key of Object.keys(registry)) {
-      const item = registry[key];
-      if (
-        item.id.toLowerCase() === lower ||
-        item.legality_id.toLowerCase() === lower ||
-        String(item.member_no) === lower ||
-        item.name.toLowerCase().includes(lower)
-      ) {
-        return item;
-      }
-    }
-    return null;
+  function getAllRecordsSorted() {
+    const list = Object.values(registry);
+    list.sort((a, b) => (a.member_no || 0) - (b.member_no || 0));
+    return list;
   }
 
-  function renderEmptyState(message) {
-    const container = document.getElementById("result-container");
-    container.innerHTML = `
-      <div class="empty-state">
-        ${escapeHtml(message || "Enter a credential identifier above to inspect cryptographic authenticity.")}
-      </div>
-    `;
-  }
+  function filterRecords(query) {
+    const clean = (query || "").trim().toLowerCase();
+    const all = getAllRecordsSorted();
+    if (!clean) return all;
 
-  function renderNotFound(query) {
-    const container = document.getElementById("result-container");
-    container.innerHTML = `
-      <div class="result-card">
-        <div class="status-banner invalid">
-          <div class="status-main">
-            <span class="status-tag">Record Not Found</span>
-            <span class="status-desc">No cryptographic signature matched this identifier in the authoritative registry.</span>
-          </div>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">Query Searched</span>
-          <span class="detail-value mono">${escapeHtml(query)}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderValid(record) {
-    const container = document.getElementById("result-container");
-    container.innerHTML = `
-      <div class="result-card">
-        <div class="status-banner valid">
-          <div class="status-main">
-            <span class="status-tag">Authentic & Verified</span>
-            <span class="status-desc">NIST FIPS 204 ML-DSA-65 post-quantum cryptographic signature verified.</span>
-          </div>
-        </div>
-
-        <div class="grid-details">
-          <div class="detail-item">
-            <span class="detail-label">Recipient Name</span>
-            <span class="detail-value">${escapeHtml(record.name)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Member Sequence</span>
-            <span class="detail-value mono">#${record.member_no}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Credential ID</span>
-            <span class="detail-value mono">${escapeHtml(record.id)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Rivide Legality ID</span>
-            <span class="detail-value mono">${escapeHtml(record.legality_id)}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Issue Date</span>
-            <span class="detail-value mono">${escapeHtml(record.date)}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Algorithm</span>
-            <span class="detail-value mono">${escapeHtml(record.algorithm)}</span>
-          </div>
-
-          <div class="detail-item full-width">
-            <span class="detail-label">Authority Fingerprint</span>
-            <span class="detail-value mono">${escapeHtml(record.key_fingerprint)}</span>
-          </div>
-
-          <div class="detail-item full-width">
-            <span class="detail-label">Signature SHA3-256 Digest</span>
-            <span class="detail-value mono">${escapeHtml(record.signature_sha3_256)}</span>
-          </div>
-
-          <div class="detail-item full-width">
-            <span class="detail-label">Canonical Audit Payload</span>
-            <div class="code-box">${escapeHtml(record.canonical_payload)}</div>
-          </div>
-        </div>
-
-        <div class="action-row">
-          <button class="action-btn" id="btn-copy-payload">Copy Canonical Payload</button>
-          <button class="action-btn" id="btn-copy-json">Copy JSON Record</button>
-        </div>
-      </div>
-    `;
-
-    document.getElementById("btn-copy-payload").addEventListener("click", function() {
-      navigator.clipboard.writeText(record.canonical_payload);
-      this.textContent = "Copied";
-      setTimeout(() => { this.textContent = "Copy Canonical Payload"; }, 1500);
-    });
-
-    document.getElementById("btn-copy-json").addEventListener("click", function() {
-      navigator.clipboard.writeText(JSON.stringify(record, null, 2));
-      this.textContent = "Copied";
-      setTimeout(() => { this.textContent = "Copy JSON Record"; }, 1500);
+    return all.filter(r => {
+      return (
+        r.id.toLowerCase() === clean ||
+        r.id.toLowerCase().includes(clean) ||
+        r.legality_id.toLowerCase().includes(clean) ||
+        r.name.toLowerCase().includes(clean) ||
+        String(r.member_no) === clean ||
+        `#${r.member_no}` === clean
+      );
     });
   }
 
@@ -179,16 +92,190 @@
       .replace(/'/g, "&#039;");
   }
 
-  function handleSearch(query) {
-    if (!query) {
-      renderEmptyState();
+  function renderDirectory(records, isFiltered) {
+    const container = document.getElementById("result-view");
+    if (!records.length) {
+      container.innerHTML = `
+        <div class="card state-empty">
+          No credential record matches your query.
+        </div>
+      `;
       return;
     }
-    const record = findRecord(query);
-    if (record) {
-      renderValid(record);
+
+    const title = isFiltered ? "Search Results" : "Verified Registry Directory";
+    const rows = records.map(r => `
+      <div class="directory-row" data-id="${escapeHtml(r.id)}">
+        <div class="row-left">
+          <span class="row-num">#${String(r.member_no).padStart(2, "0")}</span>
+          <span class="row-name">${escapeHtml(r.name)}</span>
+        </div>
+        <div class="row-right">
+          <span class="row-id">${escapeHtml(r.id)}</span>
+          <svg class="row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </div>
+      </div>
+    `).join("");
+
+    container.innerHTML = `
+      <div class="directory-header">
+        <span class="directory-title">${escapeHtml(title)}</span>
+        <span class="directory-count">${records.length} ${records.length === 1 ? "record" : "records"}</span>
+      </div>
+      <div class="directory-list">
+        ${rows}
+      </div>
+    `;
+
+    container.querySelectorAll(".directory-row").forEach(row => {
+      row.addEventListener("click", function() {
+        const id = this.getAttribute("data-id");
+        if (id && registry[id]) {
+          const input = document.getElementById("search-input");
+          if (input) input.value = id;
+          renderDetail(registry[id]);
+          history.replaceState(null, "", `?id=${encodeURIComponent(id)}`);
+        }
+      });
+    });
+  }
+
+  function renderDetail(record) {
+    const container = document.getElementById("result-view");
+    const num = String(record.member_no || "").padStart(2, "0");
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <div class="recipient-meta">
+            <span class="recipient-num">MEMBER #${num}</span>
+            <h2 class="recipient-name">${escapeHtml(record.name)}</h2>
+          </div>
+          <span class="badge-verified">
+            <span class="badge-dot"></span>
+            Authentic
+          </span>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Credential ID</span>
+            <div class="info-value-wrap">
+              <span class="info-value mono">${escapeHtml(record.id)}</span>
+              <button type="button" class="btn-copy-mini" data-copy="${escapeHtml(record.id)}" data-label="Credential ID" aria-label="Copy ID">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Legality ID</span>
+            <div class="info-value-wrap">
+              <span class="info-value mono">${escapeHtml(record.legality_id)}</span>
+              <button type="button" class="btn-copy-mini" data-copy="${escapeHtml(record.legality_id)}" data-label="Legality ID" aria-label="Copy Legality ID">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Issue Date</span>
+            <span class="info-value mono">${escapeHtml(record.date)}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Algorithm</span>
+            <span class="info-value mono">${escapeHtml(record.algorithm)}</span>
+          </div>
+        </div>
+
+        <details class="details-block">
+          <summary class="details-summary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+            Cryptographic Audit Details
+          </summary>
+          <div class="details-content">
+            <div class="info-item">
+              <span class="info-label">Authority Fingerprint</span>
+              <span class="info-value mono">${escapeHtml(record.key_fingerprint)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Signature SHA3-256 Digest</span>
+              <span class="info-value mono">${escapeHtml(record.signature_sha3_256)}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Canonical Audit Payload</span>
+              <div class="code-field">${escapeHtml(record.canonical_payload)}</div>
+            </div>
+          </div>
+        </details>
+
+        <div class="card-actions">
+          <button type="button" class="btn-ghost" id="btn-copy-url">Copy Link</button>
+          <button type="button" class="btn-ghost" id="btn-copy-payload">Copy Payload</button>
+          <button type="button" class="btn-ghost" id="btn-copy-json">Copy JSON</button>
+        </div>
+      </div>
+    `;
+
+    container.querySelectorAll(".btn-copy-mini").forEach(btn => {
+      btn.addEventListener("click", function() {
+        const val = this.getAttribute("data-copy");
+        const lbl = this.getAttribute("data-label");
+        copyText(val, lbl);
+      });
+    });
+
+    const btnUrl = document.getElementById("btn-copy-url");
+    if (btnUrl) {
+      btnUrl.addEventListener("click", () => {
+        const url = `${window.location.origin}/verify?id=${encodeURIComponent(record.id)}`;
+        copyText(url, "verification link");
+      });
+    }
+
+    const btnPayload = document.getElementById("btn-copy-payload");
+    if (btnPayload) {
+      btnPayload.addEventListener("click", () => {
+        copyText(record.canonical_payload, "canonical payload");
+      });
+    }
+
+    const btnJson = document.getElementById("btn-copy-json");
+    if (btnJson) {
+      btnJson.addEventListener("click", () => {
+        copyText(JSON.stringify(record, null, 2), "JSON record");
+      });
+    }
+  }
+
+  function handleQuery(query) {
+    const clean = (query || "").trim();
+    const clearBtn = document.getElementById("search-clear");
+    if (clearBtn) {
+      clearBtn.style.display = clean.length ? "flex" : "none";
+    }
+
+    if (!clean) {
+      renderDirectory(getAllRecordsSorted(), false);
+      return;
+    }
+
+    const matches = filterRecords(clean);
+    if (matches.length === 1) {
+      renderDetail(matches[0]);
     } else {
-      renderNotFound(query);
+      renderDirectory(matches, true);
     }
   }
 
@@ -196,29 +283,48 @@
     initTheme();
     await loadRegistry();
 
-    const form = document.getElementById("search-form");
     const input = document.getElementById("search-input");
+    const clearBtn = document.getElementById("search-clear");
 
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      handleSearch(input.value);
-    });
+    if (input) {
+      input.addEventListener("input", function() {
+        handleQuery(this.value);
+      });
 
-    document.querySelectorAll(".chip").forEach(function(chip) {
-      chip.addEventListener("click", function() {
-        const val = this.getAttribute("data-id");
-        input.value = val;
-        handleSearch(val);
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+          this.value = "";
+          handleQuery("");
+        }
+      });
+    }
+
+    if (clearBtn && input) {
+      clearBtn.addEventListener("click", function() {
+        input.value = "";
+        input.focus();
+        handleQuery("");
+      });
+    }
+
+    document.querySelectorAll(".filter-pill").forEach(pill => {
+      pill.addEventListener("click", function() {
+        const q = this.getAttribute("data-query");
+        if (input && q) {
+          input.value = q;
+          handleQuery(q);
+        }
       });
     });
 
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get("id") || params.get("verify") || params.get("q");
+
     if (initialQuery) {
-      input.value = initialQuery;
-      handleSearch(initialQuery);
+      if (input) input.value = initialQuery;
+      handleQuery(initialQuery);
     } else {
-      renderEmptyState();
+      renderDirectory(getAllRecordsSorted(), false);
     }
   }
 

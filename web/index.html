@@ -5,71 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>dev : Credential Validator</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/logo_light.png">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="brand-row">
-        <div class="brand-identity">
-          <img src="assets/logo_light.png" alt="dev logo" class="brand-logo logo-dark-mode">
-          <img src="assets/logo_dark.png" alt="dev logo" class="brand-logo logo-light-mode">
-          <div class="brand-text">
-            <h1 class="brand-title">dev :</h1>
-            <span class="brand-badge">PQC Authority</span>
-          </div>
-        </div>
-        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+  <div class="app">
+    <header class="navbar">
+      <a href="./" class="nav-brand">
+        <img src="assets/logo_light.png" alt="dev :" class="brand-logo dark-logo">
+        <img src="assets/logo_dark.png" alt="dev :" class="brand-logo light-logo">
+        <span class="nav-tag">Validator</span>
+      </a>
+      <div class="nav-actions">
+        <button type="button" class="btn-theme" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
-          <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2"></path>
-            <path d="M12 20v2"></path>
-            <path d="m4.93 4.93 1.41 1.41"></path>
-            <path d="m17.66 17.66 1.41 1.41"></path>
-            <path d="M2 12h2"></path>
-            <path d="M20 12h2"></path>
-            <path d="m6.34 17.66-1.41 1.41"></path>
-            <path d="m19.07 4.93-1.41 1.41"></path>
+          <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
           </svg>
-          <span id="theme-label">Dark</span>
         </button>
       </div>
-      <p class="subtitle">NIST FIPS 204 ML-DSA-65 Cryptographic Credential Validator</p>
     </header>
 
-    <section class="search-section">
-      <form class="search-form" id="search-form">
-        <input
-          type="text"
-          class="search-input"
-          id="search-input"
-          placeholder="Enter Credential ID, Legality ID, or Member Name"
-          autocomplete="off"
-          spellcheck="false"
-        >
-        <button type="submit" class="search-button">Validate</button>
-      </form>
+    <main class="main-content">
+      <section class="hero-section">
+        <h1 class="hero-title">Credential Verification</h1>
+        <p class="hero-desc">Verify post-quantum NIST FIPS 204 ML-DSA-65 membership credentials for dev : community.</p>
+      </section>
 
-      <div class="example-chips">
-        <span class="example-label">Examples:</span>
-        <button type="button" class="chip" data-id="RVD-DEV-0001-F648">RVD-DEV-0001-F648</button>
-        <button type="button" class="chip" data-id="RVD-DEV-0002-9D50">RVD-DEV-0002-9D50</button>
-        <button type="button" class="chip" data-id="RVD-DEV-0003-EDC5">RVD-DEV-0003-EDC5</button>
-      </div>
-    </section>
+      <section class="lookup-section">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input
+            type="search"
+            id="search-input"
+            class="search-input"
+            placeholder="Search by name, Credential ID, or Legality ID"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button type="button" id="search-clear" class="btn-clear" aria-label="Clear search" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
 
-    <main id="result-container">
-      <div class="empty-state">
-        Enter a credential identifier above to inspect cryptographic authenticity.
-      </div>
+        <div class="quick-filter" id="quick-filter">
+          <span class="quick-label">Quick:</span>
+          <button type="button" class="filter-pill" data-query="Wisnu">Wisnu</button>
+          <button type="button" class="filter-pill" data-query="Daffa">Daffa</button>
+          <button type="button" class="filter-pill" data-query="Moh. Ananda">Moh. Ananda</button>
+          <button type="button" class="filter-pill" data-query="RVD-DEV-0003-EDC5">Rifky</button>
+        </div>
+      </section>
+
+      <section id="result-view" class="result-view"></section>
     </main>
 
-    <footer class="footer">
-      Cryptographic Integrity Powered by Rivide (NIST FIPS 204 ML-DSA-65)
+    <footer class="app-footer">
+      <div class="footer-meta">
+        <span>Rivide PQC Authority</span>
+        <span class="meta-dot">/</span>
+        <span>ML-DSA-65 & SHA3-256</span>
+      </div>
     </footer>
   </div>
+
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
 
   <script src="js/registry_data.js"></script>
   <script src="js/app.js"></script>
