@@ -559,12 +559,22 @@ details[open] .details-summary svg {
 
 .app-footer {
   margin-top: auto;
-  padding-top: 40px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.footer-meta {
+.footer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -573,8 +583,51 @@ details[open] .details-summary svg {
   color: var(--text-muted);
 }
 
+.footer-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-verified);
+}
+
+.footer-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--text-primary);
+}
+
+.footer-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
 .meta-dot {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .toast {
